@@ -65,15 +65,15 @@ module Agents
     form_configurable :debug, type: :boolean
     form_configurable :emit_events, type: :boolean
     form_configurable :expected_receive_period_in_days, type: :string
-    form_configurable :type, type: :array, values: ['planned_pollution_indices', 'version', 'bulletin']
+    form_configurable :type, type: :array, values: ['planned_pollution_indices', 'version', 'prevision_bulletin', 'pollens_bulletin']
     def validate_options
-      errors.add(:base, "type has invalid value: should be 'planned_pollution_indices', 'version', 'bulletin'") if interpolated['type'].present? && !%w(planned_pollution_indices version bulletin).include?(interpolated['type'])
+      errors.add(:base, "type has invalid value: should be 'planned_pollution_indices', 'version', 'prevision_bulletin', 'pollens_bulletin'") if interpolated['type'].present? && !%w(planned_pollution_indices version prevision_bulletin pollens_bulletin).include?(interpolated['type'])
 
       unless options['insee'].present? || !['planned_pollution_indices'].include?(options['type'])
         errors.add(:base, "insee is a required field")
       end
 
-      unless options['apikey'].present? || !['planned_pollution_indices', 'bulletin'].include?(options['type'])
+      unless options['apikey'].present? || !['planned_pollution_indices', 'prevision_bulletin', 'pollens_bulletin'].include?(options['type'])
         errors.add(:base, "apikey is a required field")
       end
 
@@ -157,11 +157,11 @@ module Agents
       request = Net::HTTP::Get.new(uri)
       request["Accept"] = "application/json"
       request["X-Api-Key"] = interpolated['apikey']
-      
+
       req_options = {
         use_ssl: uri.scheme == "https",
       }
-      
+
       response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
         http.request(request)
       end
@@ -173,17 +173,41 @@ module Agents
 
     end
 
-    def bulletin()
+    def prevision_bulletin()
 
       uri = URI.parse("https://api.airparif.asso.fr/indices/prevision/bulletin")
       request = Net::HTTP::Get.new(uri)
       request["Accept"] = "application/json"
       request["X-Api-Key"] = interpolated['apikey']
-      
+
       req_options = {
         use_ssl: uri.scheme == "https",
       }
-      
+
+      response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
+        http.request(request)
+      end
+
+      log_curl_output(response.code,response.body)
+      payload = JSON.parse(response.body)
+
+      if interpolated['emit_events'] == 'true'
+        create_event payload: payload
+      end
+
+    end
+
+    def pollens_bulletin()
+
+      uri = URI.parse("https://api.airparif.asso.fr/pollens/bulletin")
+      request = Net::HTTP::Get.new(uri)
+      request["Accept"] = "application/json"
+      request["X-Api-Key"] = interpolated['apikey']
+
+      req_options = {
+        use_ssl: uri.scheme == "https",
+      }
+
       response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
         http.request(request)
       end
@@ -228,8 +252,10 @@ module Agents
         planned_pollution_indices()
       when "version"
         version()
-      when "bulletin"
-        bulletin()
+      when "prevision_bulletin"
+        prevision_bulletin()
+      when "pollens_bulletin"
+        pollens_bulletin()
       else
         log "Error: type has an invalid value (#{interpolated['type']})"
       end
