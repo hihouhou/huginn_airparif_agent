@@ -122,7 +122,7 @@ module Agents
 
     def version()
 
-      uri = URI.parse("https://api.airparif.asso.fr/version")
+      uri = URI.parse("https://api.airparif.fr/version")
       request = Net::HTTP::Get.new(uri)
       request["Accept"] = "application/json"
       
@@ -153,7 +153,7 @@ module Agents
 
     def planned_pollution_colors()
 
-      uri = URI.parse("https://api.airparif.asso.fr/indices/prevision/couleurs")
+      uri = URI.parse("https://api.airparif.fr/indices/prevision/couleurs")
       request = Net::HTTP::Get.new(uri)
       request["Accept"] = "application/json"
       request["X-Api-Key"] = interpolated['apikey']
@@ -175,7 +175,7 @@ module Agents
 
     def prevision_bulletin()
 
-      uri = URI.parse("https://api.airparif.asso.fr/indices/prevision/bulletin")
+      uri = URI.parse("https://api.airparif.fr/indices/prevision/bulletin")
       request = Net::HTTP::Get.new(uri)
       request["Accept"] = "application/json"
       request["X-Api-Key"] = interpolated['apikey']
@@ -199,7 +199,7 @@ module Agents
 
     def pollens_bulletin()
 
-      uri = URI.parse("https://api.airparif.asso.fr/pollens/bulletin")
+      uri = URI.parse("https://api.airparif.fr/pollens/bulletin")
       request = Net::HTTP::Get.new(uri)
       request["Accept"] = "application/json"
       request["X-Api-Key"] = interpolated['apikey']
@@ -223,7 +223,7 @@ module Agents
 
     def planned_pollution_indices()
 
-      uri = URI.parse("https://api.airparif.asso.fr/indices/prevision/commune?insee=#{interpolated['insee']}")
+      uri = URI.parse("https://api.airparif.fr/indices/prevision/commune?insee=#{interpolated['insee']}")
       request = Net::HTTP::Get.new(uri)
       request["Accept"] = "application/json"
       request["X-Api-Key"] = interpolated['apikey']
